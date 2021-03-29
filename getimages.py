@@ -4,9 +4,9 @@ from bs4 import BeautifulSoup
 
 class Finder():
     def __init__(self):
-        self.deleteimages()
+        self.deleteImages()
     
-    def deleteimages(self):
+    def deleteImages(self):
         for elem in os.listdir("images"):
             os.remove(os.path.join("images",elem))
 
@@ -15,17 +15,27 @@ class Finder():
         content = requests.get(url).content
         return BeautifulSoup(content, "html.parser")
 
-    def save_images(self, imgs):
+    def getImages(self, imgs):
+        images = []
         for i, img in enumerate(imgs):
             url = "https:" + img["src"]
             response = requests.get(url)
-            image = Image.open(io.BytesIO(response.content))
-            image.save(os.path.join("images",str(i))+os.path.splitext(url)[-1])
-
+            images.append(Image.open(io.BytesIO(response.content)))
+        return images
+        
     def getSenators(self):
         soup = self.getSoup("List_of_current_United_States_senators")
         table = soup.find("table", {"id":"senators"})
         return table.find_all("img")
+    
+    def getPresidents(self):
+        soup = self.getSoup("List_of_presidents_of_the_United_States")
+        table = soup.find("table", {"class":"wikitable"})
+        return table.find_all("img")
 
-finder = Finder()
-finder.deleteimages()
+if __name__ == "__main__":
+    finder = Finder()
+    imgs = finder.getSenators()
+    images = finder.getImages(imgs)
+    images[0].show()
+    images[-1].show()
