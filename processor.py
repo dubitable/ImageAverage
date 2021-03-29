@@ -8,23 +8,29 @@ class Processor():
         content = requests.get(url).content
         return BeautifulSoup(content, "html.parser")
 
-    def getImages(self, imgs):
+    def toImages(self, imgs):
         images = []
         for i, img in enumerate(imgs):
             url = "https:" + img["src"]
             response = requests.get(url)
             images.append(Image.open(io.BytesIO(response.content)))
         return images
-        
-    def getSenators(self):
+
+    def getSenatorTags(self):
         soup = self.getSoup("List_of_current_United_States_senators")
         table = soup.find("table", {"id":"senators"})
         return table.find_all("img")
     
-    def getPresidents(self):
+    def getPresidentTags(self):
         soup = self.getSoup("List_of_presidents_of_the_United_States")
         table = soup.find("table", {"class":"wikitable"})
         return table.find_all("img")
+    
+    def importImages(self, folder):
+        images = []
+        for file in os.listdir(folder):
+            images.append(Image.open(os.path.join(folder,file)))
+        return images
 
     def average(self, images, size=None):
         if size is None: size = images[0].size
@@ -45,7 +51,7 @@ class Processor():
 
 if __name__ == "__main__":
     processor = Processor()
-    images = processor.getImages(processor.getSenators())
+    images = processor.toImages(processor.getSenatorTags())
     average = processor.average(images)
     average.show()
     
